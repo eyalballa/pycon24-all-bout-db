@@ -32,8 +32,8 @@ class AsyncBatchWriter:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.disconnect()
 
-    async def add_to_buffer(self, cid, attribute_name, attribute_value, last_seen):
-        self.active_buffer.append((cid, attribute_name, attribute_value, last_seen))
+    async def add_to_buffer(self, cid, asset_id, attribute_name, attribute_value, last_seen):
+        self.active_buffer.append((cid, asset_id, attribute_name, attribute_value, last_seen))
         if (
                 len(self.active_buffer) >= self.batch_size or
                 (datetime.utcnow() - self.last_flush_time).total_seconds() >= self.flush_interval
@@ -59,8 +59,8 @@ class AsyncBatchWriter:
             return
         await self.conn.executemany(
             """
-            INSERT INTO attributes (cid, attribute_name, attribute_value, last_seen)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO attributes (cid, asset_id, attribute_name, attribute_value, last_seen)
+            VALUES ($1, $2, $3, $4, $5)
             """,
             self.inactive_buffer,
         )
@@ -82,20 +82,22 @@ class AsyncAggregationReader:
     async def fetch_latest_attributes(self, cid):
         query = """
                 SELECT 
+                    asset_id,
                     attribute_name, 
                     attribute_value, 
                     last_seen
                 FROM (
                     SELECT 
+                        asset_id,
                         attribute_name, 
                         attribute_value, 
                         last_seen, 
-                        ROW_NUMBER() OVER (PARTITION BY attribute_name ORDER BY last_seen DESC) as row_num
+                        ROW_NUMBER() OVER (PARTITION BY asset_id, attribute_name ORDER BY last_seen DESC) as row_num
                     FROM attributes_hourly
                     WHERE cid = $1 AND last_seen >= NOW() - INTERVAL '30 days'
                 ) AS ranked
                 WHERE row_num = 1
-                ORDER BY attribute_name;
+                ORDER BY asset_id, attribute_name;
                 """
         return await self.conn.fetch(query, cid)
 
