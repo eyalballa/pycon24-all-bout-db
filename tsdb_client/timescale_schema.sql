@@ -2,6 +2,7 @@
 
 CREATE TABLE attributes (
     cid UUID,
+    asset_id UUID,
     attribute_name TEXT,
     attribute_value TEXT,
     last_seen TIMESTAMPTZ
@@ -15,6 +16,7 @@ SELECT add_retention_policy('attributes', INTERVAL '1 day');
 CREATE MATERIALIZED VIEW attributes_hourly AS
 SELECT
     cid,
+    asset_id,
     attribute_name,
     attribute_value,
     max(last_seen) AS last_seen
@@ -22,6 +24,7 @@ FROM
     attributes
 GROUP BY
     cid,
+    asset_id,
     attribute_name,
     attribute_value,
     time_bucket('1 hour', last_seen);
