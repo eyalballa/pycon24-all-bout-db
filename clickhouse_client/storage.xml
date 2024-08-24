@@ -1,0 +1,40 @@
+
+<yandex>
+<storage_configuration>
+    <disks>
+      <s3_disk>
+        <type>s3</type>
+        <endpoint>https://bucket.s3.amazonaws.com/clickhouse_disk_prod/</endpoint>
+        <metadata_path>/var/lib/clickhouse/disks/s3_disk/</metadata_path>
+        <use_environment_credentials>true</use_environment_credentials>
+        <cache_enabled>true</cache_enabled>
+        <data_cache_enabled>true</data_cache_enabled>
+        <cache_path>/var/lib/clickhouse/disks/s3_disk/cache/</cache_path>
+      </s3_disk>
+    </disks>
+    <policies>
+      <s3_main>
+        <volumes>
+          <main>
+            <disk>s3_disk</disk>
+          </main>
+        </volumes>
+      </s3_main>
+     <s3_tiered>
+        <volumes>
+          <hot>
+               <disk>default</disk>
+          </hot>
+          <main>
+            <disk>s3_disk</disk>
+            <perform_ttl_move_on_insert>False</perform_ttl_move_on_insert>
+          </main>
+        </volumes>
+        <move_factor>0.2</move_factor>
+      </s3_tiered>
+    </policies>
+  </storage_configuration>
+  <s3>
+    <use_environment_credentials>true</use_environment_credentials>
+  </s3>
+</yandex>

@@ -1,3 +1,4 @@
+
 CREATE TABLE attributes_local
 (
     `customer_id` String,
@@ -9,7 +10,7 @@ CREATE TABLE attributes_local
 ENGINE = AggregatingMergeTree
 PARTITION BY toYYYYMM(last_seen)
 ORDER BY (customer_id, attribute_name, attribute_value)
-TTL toDate(last_seen) + toIntervalDay(3) TO VOLUME 'main', last_seen + toIntervalMonth(6)
+TTL toDate(last_seen) + toIntervalDay(3) TO VOLUME 's3_main', last_seen + toIntervalMonth(6)
 SETTINGS storage_policy = 's3_tiered', index_granularity = 8192
 
 
