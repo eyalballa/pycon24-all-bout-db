@@ -56,3 +56,6 @@ class RedisClient:
             self.current_batch = 0
             self.last_execute_time = current_time
 
+    async def get_set_members(self, set_name: str):
+        return await self.redis.smembers(set_name)
+
