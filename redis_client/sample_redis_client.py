@@ -30,17 +30,17 @@ class RedisClient:
 
     async def set(self, key: str, value: str):
         self.pipe.set(key, value)
-        # self.current_batch += 1
-        #
-        # # Check if either the batch size or the time condition is met
-        # current_time = time.time()
-        # if (
-        #         self.current_batch >= self.batch_size or
-        #         (current_time - self.last_execute_time) >= self.timeout_seconds
-        # ):
-        #     await self.pipe.execute()
-        #     self.current_batch = 0
-        #     self.last_execute_time = current_time
+        self.current_batch += 1
+
+        # Check if either the batch size or the time condition is met
+        current_time = time.time()
+        if (
+                self.current_batch >= self.batch_size or
+                (current_time - self.last_execute_time) >= self.timeout_seconds
+        ):
+            await self.pipe.execute()
+            self.current_batch = 0
+            self.last_execute_time = current_time
 
     async def add_to_set(self, set_name: str, value: str):
         self.pipe.sadd(set_name, value)
