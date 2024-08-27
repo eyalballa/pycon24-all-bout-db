@@ -32,7 +32,7 @@ class AsyncBatchWriter:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.disconnect()
 
-    async def add_to_buffer(self, cid, asset_id, attribute_name, attribute_value, last_seen):
+    async def insert(self, cid, asset_id, attribute_name, attribute_value, last_seen):
         self.active_buffer.append((cid, asset_id, attribute_name, attribute_value, last_seen))
         if (
                 len(self.active_buffer) >= self.batch_size or

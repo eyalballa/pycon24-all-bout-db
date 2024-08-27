@@ -195,14 +195,18 @@ class ClickhouseBulkInsertClient:
         await self._ch_client.executemany(query, values)
         logger.debug("flushed %s records to clickhouse", len(values))
 
+    async def insertmany(self, query, values):
+        self._values[query].extend(values)
+        async with self._lock:
+            if self._should_flush(query):
+                values = self._values.pop(query)
+                await self._flush(query, values)
+
+
     async def flush_now(self, query):
         if query in self._values:
             values = self._values.pop(query)
             await self._flush(query, values)
             self._last_flush[query] = datetime.datetime.now()
 
-    async def insertmany(self, query, values):
-        self._values[query].extend(values)
-        async with self._lock:
-            if self._should_flush(query):
-                await self.flush_now(query)
+
