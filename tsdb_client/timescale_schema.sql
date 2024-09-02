@@ -13,7 +13,7 @@ SELECT create_hypertable('attributes', 'last_seen', chunk_time_interval => INTER
 SELECT add_compress_policy('attributes', INTERVAL '2 days');
 SELECT add_retention_policy('attributes', INTERVAL '3 days');
 
-CREATE MATERIALIZED VIEW attributes_hourly AS
+CREATE MATERIALIZED VIEW attributes_daily AS
 SELECT
     cid,
     asset_id,

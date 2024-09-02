@@ -8,16 +8,12 @@ from aioch import Client
 from clickhouse_driver import Client as BlockingClient
 from asyncio import Queue
 
-from prometheus_client import Counter
 from tenacity import retry, wait_fixed, stop_after_attempt, retry_if_exception_type
 import socket
 
 logger = logging.getLogger(__name__)
 
 
-_FLUSH_TASK_EXCEPTION_COUNTER = Counter(
-    'ch_flush_task_exceptions', 'Number of exceptions', ['_type']
-)
 
 _FLUSH_TASK_INTERVAL = 60 * 10
 
@@ -153,7 +149,6 @@ class ClickhouseBulkInsertClient:
             logger.info("stopping clickhouse flushing task")
             self._flush_task.cancel()
         except Exception as e:
-            _FLUSH_TASK_EXCEPTION_COUNTER.labels(_type=e.__class__.__name__.lower()).inc(1)
             logger.warning("skipping clickhouse flushing task cancellation: %s", e, exc_info=True)
 
     async def _create_flush_task(self):
@@ -175,7 +170,6 @@ class ClickhouseBulkInsertClient:
                     if self._should_flush(query):
                         await self.flush_now(query)
         except Exception as e:
-            _FLUSH_TASK_EXCEPTION_COUNTER.labels(_type=e.__class__.__name__.lower()).inc(1)
             logger.warning(
                 "clickhouse flushing task failed for query: %s. Error: %s", query, e, exc_info=True
             )

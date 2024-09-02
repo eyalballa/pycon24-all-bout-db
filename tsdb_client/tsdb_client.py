@@ -93,7 +93,7 @@ class AsyncAggregationReader:
                         attribute_value, 
                         last_seen, 
                         ROW_NUMBER() OVER (PARTITION BY asset_id, attribute_name ORDER BY last_seen DESC) as row_num
-                    FROM attributes_hourly
+                    FROM attributes_daily
                     WHERE cid = $1 AND last_seen >= NOW() - INTERVAL '30 days'
                 ) AS ranked
                 WHERE row_num = 1
