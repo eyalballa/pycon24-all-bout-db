@@ -54,6 +54,8 @@ class AsyncBatchWriter:
         await self.flush_buffer()
         self.flushing = False
 
+
+
     async def flush_buffer(self):
         if not self.inactive_buffer:
             return
@@ -81,18 +83,12 @@ class AsyncAggregationReader:
 
     async def fetch_latest_attributes(self, cid):
         query = """
-                SELECT 
-                    asset_id,
-                    attribute_name, 
-                    attribute_value, 
-                    last_seen
+                SELECT asset_id, attribute_name, attribute_value, last_seen
                 FROM (
                     SELECT 
-                        asset_id,
-                        attribute_name, 
-                        attribute_value, 
-                        last_seen, 
-                        ROW_NUMBER() OVER (PARTITION BY asset_id, attribute_name ORDER BY last_seen DESC) as row_num
+                        asset_id, attribute_name, attribute_value, last_seen, 
+                        ROW_NUMBER() OVER (PARTITION BY asset_id, attribute_name ORDER BY last_seen DESC) 
+                        as row_num
                     FROM attributes_daily
                     WHERE cid = $1 AND last_seen >= NOW() - INTERVAL '30 days'
                 ) AS ranked

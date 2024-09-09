@@ -12,21 +12,20 @@ class RedisClient:
         self.last_execute_time = None
         self.timeout_seconds = 30
 
-    async def init(self):
-        self.redis = redis.from_url(self.redis_url)
-        self.redis_url = redis_url
-        self.redis = None
-
-
-    async def close(self):
-        if self.redis:
-            await self.redis.close()
-
     # async def set(self, key: str, value: str):
     #     await self.redis.set(key, value)
 
     async def get(self, key: str):
         return await self.redis.get(key)
+
+    async def init(self):
+        self.redis = redis.from_url(self.redis_url)
+        self.redis_url = redis_url
+        self.redis = None
+
+    async def close(self):
+        if self.redis:
+            await self.redis.close()
 
     async def set(self, key: str, value: str):
         self.pipe.set(key, value)
